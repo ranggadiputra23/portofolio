@@ -118,7 +118,7 @@ export default function AboutSkills({ profile, skills }: AboutSkillsProps) {
             <div className="mt-6 pt-4 border-t border-slate-200/60 dark:border-white/10">
               <a
                 href="#contact"
-                className="w-full min-h-[44px] py-3 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-sky-400 dark:hover:bg-sky-300 text-white dark:text-slate-950 font-bold text-xs text-center flex items-center justify-center transition-all shadow-md shadow-blue-600/20 dark:shadow-sky-400/20 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400"
+                className="w-full min-h-11 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-sky-400 dark:hover:bg-sky-300 text-white dark:text-slate-950 font-bold text-xs text-center flex items-center justify-center transition-all shadow-md shadow-blue-600/20 dark:shadow-sky-400/20 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400"
               >
                 Diskusi Proyek Anda
               </a>
@@ -134,7 +134,7 @@ export default function AboutSkills({ profile, skills }: AboutSkillsProps) {
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className={`min-h-[40px] px-4 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400 ${
+                className={`min-h-10 px-4 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400 ${
                   selectedCategory === cat
                     ? "bg-blue-600 dark:bg-sky-400 text-white dark:text-slate-950 shadow-md shadow-blue-600/20 dark:shadow-sky-400/20"
                     : "bg-white/70 dark:bg-slate-900/60 backdrop-blur-sm text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 border border-white/80 dark:border-white/10"

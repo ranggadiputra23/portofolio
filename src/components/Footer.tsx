@@ -1,7 +1,7 @@
 "use client";
 
 import { Profile } from "@/lib/types";
-import { Heart, Mail, ArrowUp } from "lucide-react";
+import { Mail, ArrowUp } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/icons/SocialIcons";
 
 interface FooterProps {
@@ -14,19 +14,16 @@ export default function Footer({ profile }: FooterProps) {
   };
 
   return (
-    <footer className="py-10 border-t border-slate-200/60 dark:border-white/10 bg-white/40 dark:bg-slate-950/40 backdrop-blur-md">
+    <footer className="py-10 border-t border-slate-200/60 dark:border-white/10 bg-white/50 dark:bg-slate-950/50 backdrop-blur-md">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-5">
         {/* Left Column */}
         <div className="flex flex-col items-center md:items-start text-center md:text-left">
-          <p className="font-bold text-sm text-slate-900 dark:text-white mb-1">
+          <p className="font-bold text-sm text-slate-900 dark:text-white">
             {profile.name}{" "}
             <span className="text-blue-600 dark:text-sky-400">
               &copy; {new Date().getFullYear()}
             </span>
           </p>
-          {/* <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
-            Built with <Heart className="w-3 h-3 text-pink-500 fill-pink-500 inline" /> Next.js, Tailwind CSS & Neon DB.
-          </p> */}
         </div>
 
         {/* Middle Social Icons */}
@@ -36,10 +33,11 @@ export default function Footer({ profile }: FooterProps) {
               href={profile.github}
               target="_blank"
               rel="noreferrer"
-              className="p-2 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-800 transition-colors"
+              className="min-w-11 min-h-11 flex items-center justify-center rounded-lg text-slate-700 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white bg-white/50 dark:bg-slate-800/50 hover:bg-white/85 dark:hover:bg-slate-800 border border-white/70 dark:border-white/10 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400"
               title="GitHub"
+              aria-label="GitHub Profile"
             >
-              <GithubIcon className="w-4 h-4" />
+              <GithubIcon className="w-4 h-4" aria-hidden="true" />
             </a>
           )}
           {profile.linkedin && (
@@ -47,19 +45,21 @@ export default function Footer({ profile }: FooterProps) {
               href={profile.linkedin}
               target="_blank"
               rel="noreferrer"
-              className="p-2 rounded-lg text-slate-500 hover:text-blue-600 dark:hover:text-sky-400 hover:bg-white/80 dark:hover:bg-slate-800 transition-colors"
+              className="min-w-11 min-h-11 flex items-center justify-center rounded-lg text-slate-700 hover:text-blue-600 dark:text-slate-300 dark:hover:text-sky-400 bg-white/50 dark:bg-slate-800/50 hover:bg-white/85 dark:hover:bg-slate-800 border border-white/70 dark:border-white/10 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400"
               title="LinkedIn"
+              aria-label="LinkedIn Profile"
             >
-              <LinkedinIcon className="w-4 h-4" />
+              <LinkedinIcon className="w-4 h-4" aria-hidden="true" />
             </a>
           )}
           {profile.email && (
             <a
               href={`mailto:${profile.email}`}
-              className="p-2 rounded-lg text-slate-500 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-white/80 dark:hover:bg-slate-800 transition-colors"
+              className="min-w-11 min-h-11 flex items-center justify-center rounded-lg text-slate-700 hover:text-blue-600 dark:text-slate-300 dark:hover:text-sky-400 bg-white/50 dark:bg-slate-800/50 hover:bg-white/85 dark:hover:bg-slate-800 border border-white/70 dark:border-white/10 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400"
               title="Email"
+              aria-label="Kirim Email"
             >
-              <Mail className="w-4 h-4" />
+              <Mail className="w-4 h-4" aria-hidden="true" />
             </a>
           )}
         </div>
@@ -68,10 +68,10 @@ export default function Footer({ profile }: FooterProps) {
         <button
           type="button"
           onClick={scrollToTop}
-          className="px-3.5 py-1.5 rounded-xl bg-white/70 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/60 dark:border-white/10 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+          className="min-h-11 px-4 py-2.5 rounded-xl bg-white/70 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-800 border border-white/80 dark:border-white/10 text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 transition-all shadow-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400"
         >
           <span>Ke Atas</span>
-          <ArrowUp className="w-3.5 h-3.5" />
+          <ArrowUp className="w-3.5 h-3.5" aria-hidden="true" />
         </button>
       </div>
     </footer>

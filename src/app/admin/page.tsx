@@ -369,7 +369,10 @@ export default function AdminPage() {
             p.id === id ? { ...p, published: currentPublished } : p,
           ),
         );
-        showNotification("error", "Gagal memperbarui status visibilitas proyek.");
+        showNotification(
+          "error",
+          "Gagal memperbarui status visibilitas proyek.",
+        );
       }
     } catch {
       setProjects((prev) =>
@@ -678,7 +681,10 @@ export default function AdminPage() {
             s.id === id ? { ...s, published: currentPublished } : s,
           ),
         );
-        showNotification("error", "Gagal memperbarui status visibilitas skill.");
+        showNotification(
+          "error",
+          "Gagal memperbarui status visibilitas skill.",
+        );
       }
     } catch {
       setSkills((prev) =>
@@ -1210,7 +1216,9 @@ export default function AdminPage() {
                   {projects.length}
                 </p>
                 <p className="text-[10px] text-slate-400 mt-1">
-                  {projects.filter((p) => p.published !== false).length} Tampil &bull; {projects.filter((p) => p.published === false).length} Sembunyi
+                  {projects.filter((p) => p.published !== false).length} Tampil
+                  &bull; {projects.filter((p) => p.published === false).length}{" "}
+                  Sembunyi
                 </p>
               </GlassCard>
 
@@ -1222,7 +1230,9 @@ export default function AdminPage() {
                   {skills.length}
                 </p>
                 <p className="text-[10px] text-slate-400 mt-1">
-                  {skills.filter((s) => s.published !== false).length} Tampil &bull; {skills.filter((s) => s.published === false).length} Sembunyi
+                  {skills.filter((s) => s.published !== false).length} Tampil
+                  &bull; {skills.filter((s) => s.published === false).length}{" "}
+                  Sembunyi
                 </p>
               </GlassCard>
 
@@ -1234,7 +1244,10 @@ export default function AdminPage() {
                   {experiences.length}
                 </p>
                 <p className="text-[10px] text-slate-400 mt-1">
-                  {experiences.filter((e) => e.published !== false).length} Tampil &bull; {experiences.filter((e) => e.published === false).length} Sembunyi
+                  {experiences.filter((e) => e.published !== false).length}{" "}
+                  Tampil &bull;{" "}
+                  {experiences.filter((e) => e.published === false).length}{" "}
+                  Sembunyi
                 </p>
               </GlassCard>
 
@@ -1316,11 +1329,13 @@ export default function AdminPage() {
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   Total {projects.length} proyek &bull;{" "}
                   <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-                    {projects.filter((p) => p.published !== false).length} Tampil
+                    {projects.filter((p) => p.published !== false).length}{" "}
+                    Tampil
                   </span>{" "}
                   &bull;{" "}
                   <span className="text-slate-400 font-semibold">
-                    {projects.filter((p) => p.published === false).length} Sembunyi
+                    {projects.filter((p) => p.published === false).length}{" "}
+                    Sembunyi
                   </span>
                 </p>
               </div>
@@ -1490,7 +1505,8 @@ export default function AdminPage() {
                   </span>{" "}
                   &bull;{" "}
                   <span className="text-slate-400 font-semibold">
-                    {skills.filter((s) => s.published === false).length} Sembunyi
+                    {skills.filter((s) => s.published === false).length}{" "}
+                    Sembunyi
                   </span>
                 </p>
               </div>
@@ -1610,11 +1626,13 @@ export default function AdminPage() {
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   Total {experiences.length} pengalaman kerja &bull;{" "}
                   <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-                    {experiences.filter((e) => e.published !== false).length} Tampil
+                    {experiences.filter((e) => e.published !== false).length}{" "}
+                    Tampil
                   </span>{" "}
                   &bull;{" "}
                   <span className="text-slate-400 font-semibold">
-                    {experiences.filter((e) => e.published === false).length} Sembunyi
+                    {experiences.filter((e) => e.published === false).length}{" "}
+                    Sembunyi
                   </span>
                 </p>
               </div>
@@ -1879,7 +1897,7 @@ export default function AdminPage() {
                   </div>
                   {profile.resumeUrl && profile.resumeUrl !== "#" && (
                     <div className="mt-2 flex items-center justify-between text-[11px] p-2 rounded-xl bg-slate-100/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-white/5">
-                      <span className="text-slate-600 dark:text-slate-300 flex items-center gap-1.5 truncate max-w-[240px] sm:max-w-xs">
+                      <span className="text-slate-600 dark:text-slate-300 flex items-center gap-1.5 truncate max-w-60 sm:max-w-xs">
                         <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                         <span className="truncate font-mono text-[10px] text-blue-600 dark:text-sky-400">
                           {profile.resumeUrl}
@@ -2820,7 +2838,6 @@ function AdminDashboardSkeleton() {
     <div className="min-h-screen py-6 sm:py-8 animate-in fade-in duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-          
           {/* Sidebar Shimmer Skeleton */}
           <GlassCard className="lg:col-span-3 p-5 sm:p-6 space-y-6">
             {/* User Profile Card Shimmer */}
@@ -2838,13 +2855,13 @@ function AdminDashboardSkeleton() {
             {/* Navigation Tab Items Shimmer */}
             <div className="space-y-2">
               {[
-                { w: 'w-24' },
-                { w: 'w-28' },
-                { w: 'w-20' },
-                { w: 'w-32' },
-                { w: 'w-24' },
-                { w: 'w-28' },
-                { w: 'w-30' },
+                { w: "w-24" },
+                { w: "w-28" },
+                { w: "w-20" },
+                { w: "w-32" },
+                { w: "w-24" },
+                { w: "w-28" },
+                { w: "w-30" },
               ].map((item, idx) => (
                 <div
                   key={idx}
@@ -2852,7 +2869,9 @@ function AdminDashboardSkeleton() {
                 >
                   <div className="flex items-center gap-2.5">
                     <div className="w-4 h-4 rounded-md bg-slate-200/70 dark:bg-slate-800/70 animate-pulse" />
-                    <div className={`h-3 rounded-md bg-slate-200/70 dark:bg-slate-800/70 animate-pulse ${item.w}`} />
+                    <div
+                      className={`h-3 rounded-md bg-slate-200/70 dark:bg-slate-800/70 animate-pulse ${item.w}`}
+                    />
                   </div>
                   {idx === 5 && (
                     <div className="w-5 h-4 rounded-full bg-slate-200/80 dark:bg-slate-800/80 animate-pulse" />
@@ -2916,7 +2935,6 @@ function AdminDashboardSkeleton() {
               </div>
             </GlassCard>
           </div>
-
         </div>
       </div>
     </div>

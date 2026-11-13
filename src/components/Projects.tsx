@@ -71,7 +71,7 @@ export default function Projects({ projects }: ProjectsProps) {
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className={`min-h-[40px] px-4 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400 ${
+                className={`min-h-10 px-4 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400 ${
                   selectedCategory === cat
                     ? "bg-blue-600 dark:bg-sky-400 text-white dark:text-slate-950 shadow-md shadow-blue-600/20 dark:shadow-sky-400/20"
                     : "bg-white/70 dark:bg-slate-900/60 backdrop-blur-sm text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 border border-white/80 dark:border-white/10"
@@ -102,7 +102,10 @@ export default function Projects({ projects }: ProjectsProps) {
         {/* Projects Cards Grid */}
         {filteredProjects.length === 0 ? (
           <GlassCard className="p-10 text-center max-w-md mx-auto my-12">
-            <Layers className="w-10 h-10 text-slate-400 mx-auto mb-3" aria-hidden="true" />
+            <Layers
+              className="w-10 h-10 text-slate-400 mx-auto mb-3"
+              aria-hidden="true"
+            />
             <p className="font-bold text-base mb-1 text-slate-900 dark:text-white">
               Tidak Ada Proyek Ditemukan
             </p>
@@ -143,7 +146,10 @@ export default function Projects({ projects }: ProjectsProps) {
                   {/* Featured Badge */}
                   {project.featured && (
                     <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md">
-                      <Star className="w-3.5 h-3.5 fill-slate-950" aria-hidden="true" />
+                      <Star
+                        className="w-3.5 h-3.5 fill-slate-950"
+                        aria-hidden="true"
+                      />
                       Unggulan
                     </div>
                   )}
@@ -184,7 +190,7 @@ export default function Projects({ projects }: ProjectsProps) {
                     <button
                       type="button"
                       onClick={() => setActiveModalProject(project)}
-                      className="min-h-[44px] px-2 text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-sky-400 dark:hover:text-sky-300 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400"
+                      className="min-h-11 px-2 text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-sky-400 dark:hover:text-sky-300 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400"
                     >
                       Lihat Detail
                     </button>
@@ -195,7 +201,7 @@ export default function Projects({ projects }: ProjectsProps) {
                           href={project.githubUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400"
+                          className="min-w-11 min-h-11 flex items-center justify-center rounded-lg text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400"
                           title="Source Code"
                           aria-label={`Source code ${project.title} di GitHub`}
                         >
@@ -207,11 +213,14 @@ export default function Projects({ projects }: ProjectsProps) {
                           href={project.demoUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-sky-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400"
+                          className="min-w-11 min-h-11 flex items-center justify-center rounded-lg text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-sky-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400"
                           title="Live Demo"
                           aria-label={`Live demo ${project.title}`}
                         >
-                          <ExternalLink className="w-4 h-4" aria-hidden="true" />
+                          <ExternalLink
+                            className="w-4 h-4"
+                            aria-hidden="true"
+                          />
                         </a>
                       )}
                     </div>
@@ -240,7 +249,7 @@ export default function Projects({ projects }: ProjectsProps) {
             <button
               type="button"
               onClick={() => setActiveModalProject(null)}
-              className="min-w-[44px] min-h-[44px] absolute top-4 right-4 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400"
+              className="min-w-11 min-h-11 absolute top-4 right-4 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400"
               aria-label="Tutup Detail Proyek"
             >
               <X className="w-5 h-5" aria-hidden="true" />
@@ -294,7 +303,7 @@ export default function Projects({ projects }: ProjectsProps) {
                   href={activeModalProject.demoUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="min-h-[44px] px-5 py-2.5 rounded-xl bg-blue-600 dark:bg-sky-400 hover:bg-blue-700 dark:hover:bg-sky-300 text-white dark:text-slate-950 font-bold text-xs flex items-center gap-2 shadow-md shadow-blue-600/20 dark:shadow-sky-400/20 transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400"
+                  className="min-h-11 px-5 py-2.5 rounded-xl bg-blue-600 dark:bg-sky-400 hover:bg-blue-700 dark:hover:bg-sky-300 text-white dark:text-slate-950 font-bold text-xs flex items-center gap-2 shadow-md shadow-blue-600/20 dark:shadow-sky-400/20 transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400"
                 >
                   <ExternalLink className="w-4 h-4" aria-hidden="true" />
                   Kunjungi Live Demo
@@ -305,7 +314,7 @@ export default function Projects({ projects }: ProjectsProps) {
                   href={activeModalProject.githubUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="min-h-[44px] px-5 py-2.5 rounded-xl bg-white/80 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-white/10 hover:bg-white dark:hover:bg-slate-700 font-bold text-xs flex items-center gap-2 transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400"
+                  className="min-h-11 px-5 py-2.5 rounded-xl bg-white/80 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-white/10 hover:bg-white dark:hover:bg-slate-700 font-bold text-xs flex items-center gap-2 transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:focus-visible:outline-sky-400"
                 >
                   <GithubIcon className="w-4 h-4" aria-hidden="true" />
                   Source Code di GitHub
