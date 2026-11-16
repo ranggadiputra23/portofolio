@@ -1,31 +1,31 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-import { ThemeProvider } from '@/components/ThemeProvider';
-import { AmbientBackground } from '@/components/AmbientBackground';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { AmbientBackground } from "@/components/AmbientBackground";
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Rangga Adi Putra - Frontend Web Developer Portfolio',
+  title: "Rangga Adi Putra - Portfolio",
   description:
-    'Portofolio profesional Rangga Adi Putra, seorang Frontend Web Developer berpengalaman dengan spesialisasi Next.js, React, TypeScript, dan Tailwind CSS.',
+    "Portofolio profesional Rangga Adi Putra, seorang Frontend Web Developer berpengalaman dengan spesialisasi Next.js, React, TypeScript, dan Tailwind CSS.",
   keywords: [
-    'Rangga Adi Putra',
-    'Frontend Developer',
-    'Next.js',
-    'React',
-    'TypeScript',
-    'Tailwind CSS',
-    'Web Developer Indonesia',
-    'Portfolio',
+    "Rangga Adi Putra",
+    "Frontend Developer",
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Tailwind CSS",
+    "Web Developer Indonesia",
+    "Portfolio",
   ],
-  authors: [{ name: 'Rangga Adi Putra' }],
+  authors: [{ name: "Rangga Adi Putra" }],
   openGraph: {
-    title: 'Rangga Adi Putra - Frontend Web Developer Portfolio',
+    title: "Rangga Adi Putra - Portfolio",
     description:
-      'Portofolio profesional Rangga Adi Putra dengan tampilan clean, dark mode, dan performa tinggi.',
-    type: 'website',
+      "Portofolio profesional Rangga Adi Putra dengan tampilan clean, dark mode, dan performa tinggi.",
+    type: "website",
   },
 };
 
@@ -42,7 +42,7 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >

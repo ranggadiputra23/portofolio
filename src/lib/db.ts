@@ -1,26 +1,33 @@
 import { neon } from '@neondatabase/serverless';
 import crypto from 'crypto';
 import { Project, Skill, Experience, Profile, Message, AdminUser } from './types';
-import {
-  initialProfile,
-  initialProjects,
-  initialSkills,
-  initialExperiences,
-  initialMessages,
-  initialAdmin,
-} from './mockData';
 
 export function hashPassword(password: string): string {
   return crypto.createHash('sha256').update(password).digest('hex');
 }
 
 // In-memory cache for fallback when DATABASE_URL is not set
-let memoryProfile: Profile = { ...initialProfile };
-let memoryProjects: Project[] = [...initialProjects];
-let memorySkills: Skill[] = [...initialSkills];
-let memoryExperiences: Experience[] = [...initialExperiences];
-let memoryMessages: Message[] = [...initialMessages];
-let memoryAdmin: AdminUser = { ...initialAdmin };
+let memoryProfile: Profile = {
+  id: 'profile-1',
+  name: '',
+  title: '',
+  bio: '',
+  aboutText: '',
+  email: '',
+  phone: '',
+  location: '',
+  github: '',
+  linkedin: '',
+  twitter: '',
+  instagram: '',
+  resumeUrl: '',
+  avatarUrl: '',
+};
+let memoryProjects: Project[] = [];
+let memorySkills: Skill[] = [];
+let memoryExperiences: Experience[] = [];
+let memoryMessages: Message[] = [];
+let memoryAdmin: AdminUser | null = null;
 
 function getNeonSql() {
   const dbUrl = process.env.DATABASE_URL;
@@ -130,54 +137,6 @@ async function ensureTablesExist(sql: any) {
         updated_at TEXT
       );
     `;
-
-    // Seed admin if table is empty
-    const adminRows = await sql`SELECT COUNT(*) FROM portfolio_admin`;
-    if (parseInt(adminRows[0].count, 10) === 0) {
-      const now = new Date().toISOString();
-      await sql`
-        INSERT INTO portfolio_admin (id, username, password_plain, password_hash, created_at, updated_at)
-        VALUES (${initialAdmin.id}, ${initialAdmin.username}, ${initialAdmin.passwordPlain}, ${initialAdmin.passwordHash}, ${now}, ${now})
-      `;
-    }
-
-    // Seed initial data if tables are empty
-    const profileRows = await sql`SELECT COUNT(*) FROM portfolio_profile`;
-    if (parseInt(profileRows[0].count, 10) === 0) {
-      await sql`
-        INSERT INTO portfolio_profile (id, name, title, bio, about_text, email, phone, location, github, linkedin, twitter, instagram, resume_url, avatar_url)
-        VALUES (${initialProfile.id}, ${initialProfile.name}, ${initialProfile.title}, ${initialProfile.bio}, ${initialProfile.aboutText}, ${initialProfile.email}, ${initialProfile.phone || ''}, ${initialProfile.location}, ${initialProfile.github}, ${initialProfile.linkedin}, ${initialProfile.twitter || ''}, ${initialProfile.instagram || ''}, ${initialProfile.resumeUrl}, ${initialProfile.avatarUrl})
-      `;
-
-      for (const p of initialProjects) {
-        await sql`
-          INSERT INTO portfolio_projects (id, title, slug, description, long_description, image_url, tech_stack, demo_url, github_url, category, featured, published, created_at)
-          VALUES (${p.id}, ${p.title}, ${p.slug}, ${p.description}, ${p.longDescription || ''}, ${p.imageUrl}, ${p.techStack}, ${p.demoUrl || ''}, ${p.githubUrl || ''}, ${p.category}, ${p.featured}, ${p.published ?? true}, ${p.createdAt})
-        `;
-      }
-
-      for (const s of initialSkills) {
-        await sql`
-          INSERT INTO portfolio_skills (id, name, category, icon, proficiency, sort_order, published)
-          VALUES (${s.id}, ${s.name}, ${s.category}, ${s.icon}, ${s.proficiency}, ${s.sortOrder}, ${s.published ?? true})
-        `;
-      }
-
-      for (const e of initialExperiences) {
-        await sql`
-          INSERT INTO portfolio_experiences (id, role, company, location, period, description, highlights, sort_order, published)
-          VALUES (${e.id}, ${e.role}, ${e.company}, ${e.location || ''}, ${e.period}, ${e.description}, ${e.highlights}, ${e.sortOrder}, ${e.published ?? true})
-        `;
-      }
-
-      for (const m of initialMessages) {
-        await sql`
-          INSERT INTO portfolio_messages (id, sender_name, sender_email, subject, message, is_read, created_at)
-          VALUES (${m.id}, ${m.senderName}, ${m.senderEmail}, ${m.subject}, ${m.message}, ${m.isRead}, ${m.createdAt})
-          ON CONFLICT (id) DO NOTHING
-        `;
-      }
-    }
 
     tablesInitialized = true;
   } catch (error) {
@@ -747,10 +706,11 @@ export async function updateAdminCredentials(newUsername: string, newPasswordPla
   }
 
   memoryAdmin = {
-    ...memoryAdmin,
+    id: memoryAdmin?.id ?? 'admin-1',
     username: cleanUsername,
     passwordPlain: newPasswordPlain,
     passwordHash: hash,
+    createdAt: memoryAdmin?.createdAt ?? now,
     updatedAt: now,
   };
   return memoryAdmin;
