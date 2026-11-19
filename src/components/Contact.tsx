@@ -64,7 +64,7 @@ export default function Contact({ profile }: ContactProps) {
   };
 
   return (
-    <section id="contact" className="py-20 relative">
+    <section id="contact" className="py-20 relative scroll-mt-24">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-14">
@@ -161,7 +161,7 @@ export default function Contact({ profile }: ContactProps) {
                     htmlFor="contact-name"
                     className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5"
                   >
-                    Nama Anda *
+                    Nama Anda <span className="text-rose-500">*</span>
                   </label>
                   <input
                     id="contact-name"
@@ -181,7 +181,7 @@ export default function Contact({ profile }: ContactProps) {
                     htmlFor="contact-email"
                     className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5"
                   >
-                    Email Anda *
+                    Email Anda <span className="text-rose-500">*</span>
                   </label>
                   <input
                     id="contact-email"
@@ -221,7 +221,7 @@ export default function Contact({ profile }: ContactProps) {
                   htmlFor="contact-message"
                   className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5"
                 >
-                  Isi Pesan *
+                  Isi Pesan <span className="text-rose-500">*</span>
                 </label>
                 <textarea
                   id="contact-message"

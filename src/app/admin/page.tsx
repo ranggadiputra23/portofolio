@@ -29,6 +29,7 @@ import {
   Mail,
   MailOpen,
   FileText,
+  Loader2,
 } from "lucide-react";
 import { Project, Skill, Experience, Profile, Message } from "@/lib/types";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -42,6 +43,7 @@ export default function AdminPage() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [currentAdminUser, setCurrentAdminUser] = useState<string>("rangga");
   const [loginError, setLoginError] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [activeTab, setActiveTab] = useState<
     | "overview"
     | "projects"
@@ -206,9 +208,15 @@ export default function AdminPage() {
     setTimeout(() => setNotification(null), 4000);
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitLogin = async () => {
+    if (isLoggingIn) return;
+    if (!usernameInput.trim() || !passwordInput.trim()) {
+      setLoginError("Username dan password wajib diisi.");
+      return;
+    }
+
     setLoginError("");
+    setIsLoggingIn(true);
     try {
       const res = await fetch("/api/auth", {
         method: "POST",
@@ -236,6 +244,22 @@ export default function AdminPage() {
       }
     } catch {
       setLoginError("Terjadi kesalahan koneksi server.");
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await submitLogin();
+  };
+
+  const handleLoginInputKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (e.key === "Enter" && !e.nativeEvent.isComposing) {
+      e.preventDefault();
+      void submitLogin();
     }
   };
 
@@ -960,9 +984,9 @@ export default function AdminPage() {
           {/* Subtle Top Accent Ribbon */}
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-blue-600 via-sky-500 to-cyan-400 dark:from-sky-400 dark:via-blue-400 dark:to-cyan-400" />
 
-          <div className="flex justify-end mb-2">
+          {/* <div className="flex justify-end mb-2">
             <ThemeToggle size="sm" />
-          </div>
+          </div> */}
 
           <div className="w-14 h-14 rounded-2xl bg-blue-500/10 dark:bg-sky-400/10 border border-blue-500/20 dark:border-sky-400/20 text-blue-600 dark:text-sky-400 flex items-center justify-center mx-auto mb-4 shadow-xs">
             <ShieldCheck className="w-7 h-7" />
@@ -972,9 +996,9 @@ export default function AdminPage() {
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight mb-1 text-slate-900 dark:text-white">
               Admin Login Portal
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Autentikasi Database Neon DB (Encrypted & Plain Text)
-            </p>
+            {/* <p className="text-xs text-slate-500 dark:text-slate-400">
+              Autentikasi Database Neon DB 
+            </p> */}
           </div>
 
           {loginError && (
@@ -984,7 +1008,7 @@ export default function AdminPage() {
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-3.5">
+          <form onSubmit={handleLogin} noValidate className="space-y-3.5">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
                 Username Admin
@@ -994,11 +1018,13 @@ export default function AdminPage() {
                 <input
                   type="text"
                   required
+                  disabled={isLoggingIn}
                   autoComplete="username"
-                  placeholder="Username (Default: rangga)"
+                  placeholder="Masukkan Username"
                   value={usernameInput}
                   onChange={(e) => setUsernameInput(e.target.value)}
-                  className="glass-input w-full pl-10 pr-4 py-2.5 text-xs rounded-xl"
+                  onKeyDown={handleLoginInputKeyDown}
+                  className="glass-input w-full pl-10 pr-4 py-2.5 text-xs rounded-xl disabled:opacity-60"
                 />
               </div>
             </div>
@@ -1012,32 +1038,47 @@ export default function AdminPage() {
                 <input
                   type="password"
                   required
+                  disabled={isLoggingIn}
                   autoComplete="current-password"
-                  placeholder="Password (Default: rangga123)"
+                  placeholder="Masukkan Password"
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
-                  className="glass-input w-full pl-10 pr-4 py-2.5 text-xs rounded-xl"
+                  onKeyDown={handleLoginInputKeyDown}
+                  className="glass-input w-full pl-10 pr-4 py-2.5 text-xs rounded-xl disabled:opacity-60"
                 />
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-sky-400 dark:hover:bg-sky-300 text-white dark:text-slate-950 font-bold text-xs shadow-md shadow-blue-600/25 dark:shadow-sky-400/20 flex items-center justify-center gap-2 transition-all cursor-pointer mt-2"
+              disabled={isLoggingIn}
+              className="w-full min-h-11 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-sky-400 dark:hover:bg-sky-300 text-white dark:text-slate-950 font-bold text-xs shadow-md shadow-blue-600/25 dark:shadow-sky-400/20 flex items-center justify-center gap-2 transition-all cursor-pointer mt-2 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
             >
-              <Lock className="w-3.5 h-3.5" />
-              <span>Masuk ke Dashboard</span>
+              {isLoggingIn ? (
+                <>
+                  <Loader2
+                    className="w-3.5 h-3.5 animate-spin"
+                    aria-hidden="true"
+                  />
+                  <span>Memverifikasi...</span>
+                </>
+              ) : (
+                <>
+                  <Lock className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span>Masuk ke Dashboard</span>
+                </>
+              )}
             </button>
           </form>
 
-          <div className="mt-5 text-center border-t border-slate-200/60 dark:border-white/10 pt-3.5">
+          {/* <div className="mt-5 text-center border-t border-slate-200/60 dark:border-white/10 pt-3.5">
             <a
               href="/"
               className="text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-sky-400 transition-colors"
             >
               &larr; Kembali ke Portfolio Publik
             </a>
-          </div>
+          </div> */}
         </GlassCard>
       </div>
     );
@@ -2209,7 +2250,7 @@ export default function AdminPage() {
       {/* Project Form Modal with Glassmorphism and Real-Time Image Preview */}
       {isProjectModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200">
-          <GlassCard className="w-full max-w-xl p-6 sm:p-7 max-h-[90vh] overflow-y-auto shadow-2xl">
+          <GlassCard className="w-full max-w-3xl p-6 sm:p-7 max-h-[90vh] overflow-y-auto shadow-2xl">
             <h3 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">
               {editingProject ? "Edit Proyek" : "Tambah Proyek Baru"}
             </h3>
@@ -2464,7 +2505,7 @@ export default function AdminPage() {
       {/* Skill Form Modal with Glassmorphism */}
       {isSkillModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200">
-          <GlassCard className="w-full max-w-lg p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+          <GlassCard className="w-full max-w-2xl p-6 sm:p-7 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="text-base font-bold mb-3 text-slate-900 dark:text-white">
               {editingSkill ? "Edit Keahlian" : "Tambah Skill Baru"}
             </h3>
@@ -2679,7 +2720,7 @@ export default function AdminPage() {
       {/* Experience Form Modal with Glassmorphism */}
       {isExpModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200">
-          <GlassCard className="w-full max-w-md p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+          <GlassCard className="w-full max-w-2xl p-6 sm:p-7 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="text-base font-bold mb-3 text-slate-900 dark:text-white">
               {editingExp ? "Edit Pengalaman Kerja" : "Tambah Pengalaman Kerja"}
             </h3>
