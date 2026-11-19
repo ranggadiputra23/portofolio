@@ -533,6 +533,36 @@ export async function deleteExperience(id: string): Promise<boolean> {
   return true;
 }
 
+export async function reorderExperiences(orderedIds: string[]): Promise<Experience[]> {
+  const orderMap = new Map<string, number>();
+  orderedIds.forEach((id, idx) => {
+    orderMap.set(id, idx + 1);
+  });
+
+  memoryExperiences = memoryExperiences
+    .map((exp) => ({
+      ...exp,
+      sortOrder: orderMap.get(exp.id) ?? exp.sortOrder,
+    }))
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+
+  const sql = getNeonSql();
+  if (sql) {
+    try {
+      await ensureTablesExist(sql);
+      await Promise.all(
+        orderedIds.map((id, idx) =>
+          sql`UPDATE portfolio_experiences SET sort_order = ${idx + 1} WHERE id = ${id}`
+        )
+      );
+    } catch (e) {
+      console.error('Failed to reorder experiences on Neon DB:', e);
+    }
+  }
+
+  return getExperiences();
+}
+
 export async function getMessages(): Promise<Message[]> {
   const sql = getNeonSql();
   if (sql) {

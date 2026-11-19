@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Reorder, useDragControls } from "framer-motion";
 import {
   Lock,
   KeyRound,
@@ -30,11 +31,170 @@ import {
   MailOpen,
   FileText,
   Loader2,
+  GripVertical,
 } from "lucide-react";
 import { Project, Skill, Experience, Profile, Message } from "@/lib/types";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GlassCard } from "@/components/GlassCard";
 import { TechLogo } from "@/components/icons/TechIcons";
+
+interface SortableExperienceItemProps {
+  exp: Experience;
+  index: number;
+  onDragEnd: () => void;
+  onToggleVisibility: (id: string, currentPublished?: boolean) => void;
+  onEdit: (exp: Experience) => void;
+  onDelete: (id: string) => void;
+}
+
+function SortableExperienceItem({
+  exp,
+  index,
+  onDragEnd,
+  onToggleVisibility,
+  onEdit,
+  onDelete,
+}: SortableExperienceItemProps) {
+  const dragControls = useDragControls();
+
+  return (
+    <Reorder.Item
+      value={exp}
+      dragListener={false}
+      dragControls={dragControls}
+      onDragEnd={onDragEnd}
+      className="list-none"
+      whileDrag={{ scale: 1.01 }}
+    >
+      <GlassCard
+        className={`p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4 transition-shadow ${
+          exp.published === false
+            ? "opacity-75 border-dashed border-slate-300 dark:border-slate-700"
+            : ""
+        }`}
+      >
+        <div className="flex items-start gap-3 flex-1 min-w-0">
+          <button
+            type="button"
+            onPointerDown={(event) => dragControls.start(event)}
+            className="min-w-[44px] min-h-[44px] -ml-2 -mt-1 flex flex-col items-center justify-center rounded-xl text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-200 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 touch-none cursor-grab active:cursor-grabbing shrink-0 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            aria-label={`Geser untuk mengubah urutan pengalaman ${exp.role}`}
+            title="Tahan & geser untuk ubah urutan"
+          >
+            <GripVertical className="w-4 h-4" aria-hidden="true" />
+            <span className="text-[10px] font-bold leading-none mt-0.5">
+              #{index + 1}
+            </span>
+          </button>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <h4 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">
+                {exp.role}
+              </h4>
+              <span
+                className={`px-2 py-0.5 text-xs font-bold rounded-md flex items-center gap-1 ${
+                  exp.published !== false
+                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60"
+                    : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 border border-slate-200/60 dark:border-white/10"
+                }`}
+              >
+                {exp.published !== false ? (
+                  <>
+                    <Eye className="w-3 h-3" aria-hidden="true" />
+                    <span>Tampil</span>
+                  </>
+                ) : (
+                  <>
+                    <EyeOff className="w-3 h-3" aria-hidden="true" />
+                    <span>Sembunyi</span>
+                  </>
+                )}
+              </span>
+            </div>
+            <p className="text-xs font-semibold text-blue-600 dark:text-sky-400 mb-2">
+              {exp.company} ({exp.period})
+            </p>
+            <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+              {exp.description}
+            </p>
+            {exp.highlights && exp.highlights.length > 0 && (
+              <ul className="mt-2.5 space-y-1">
+                {exp.highlights.map((h, idx) => (
+                  <li
+                    key={idx}
+                    className="text-xs text-slate-600 dark:text-slate-300 flex items-start gap-1.5"
+                  >
+                    <span className="text-blue-500 dark:text-sky-400 shrink-0 mt-0.5">
+                      &bull;
+                    </span>
+                    <span>{h}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0 self-end sm:self-start pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/60 dark:border-white/10 w-full sm:w-auto justify-end">
+          {/* Switch Tampil/Sembunyi */}
+          <button
+            type="button"
+            role="switch"
+            aria-checked={exp.published !== false}
+            aria-label={
+              exp.published !== false
+                ? `Sembunyikan pengalaman ${exp.role}`
+                : `Tampilkan pengalaman ${exp.role}`
+            }
+            onClick={() => onToggleVisibility(exp.id, exp.published)}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full p-0.5 transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+              exp.published !== false
+                ? "bg-emerald-500 dark:bg-emerald-400"
+                : "bg-slate-300 dark:bg-slate-700"
+            }`}
+            title={
+              exp.published !== false
+                ? "Status: Tampil di website portofolio (Klik untuk sembunyikan)"
+                : "Status: Disembunyikan (Klik untuk tampilkan kembali)"
+            }
+          >
+            <span
+              className={`pointer-events-none flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-xs transition-transform duration-200 ease-in-out ${
+                exp.published !== false ? "translate-x-5" : "translate-x-0"
+              }`}
+            >
+              {exp.published !== false ? (
+                <Eye className="w-3 h-3 text-emerald-600 block shrink-0" aria-hidden="true" />
+              ) : (
+                <EyeOff className="w-3 h-3 text-slate-400 block shrink-0" aria-hidden="true" />
+              )}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onEdit(exp)}
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-blue-600 dark:text-sky-400 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            title="Edit Pengalaman"
+            aria-label={`Edit pengalaman ${exp.role}`}
+          >
+            <Edit className="w-4 h-4" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onDelete(exp.id)}
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+            title="Hapus Pengalaman"
+            aria-label={`Hapus pengalaman ${exp.role}`}
+          >
+            <Trash2 className="w-4 h-4" aria-hidden="true" />
+          </button>
+        </div>
+      </GlassCard>
+    </Reorder.Item>
+  );
+}
 
 export default function AdminPage() {
   const [usernameInput, setUsernameInput] = useState("");
@@ -130,6 +290,8 @@ export default function AdminPage() {
 
   const [isExpModalOpen, setIsExpModalOpen] = useState(false);
   const [editingExp, setEditingExp] = useState<Experience | null>(null);
+  const lastSavedExpOrderRef = useRef<string>("");
+  const latestExpIdsRef = useRef<string[]>([]);
   const [expForm, setExpForm] = useState({
     role: "",
     company: "",
@@ -194,7 +356,12 @@ export default function AdminPage() {
       if (pData.success) setProfile(pData.data);
       if (prData.success) setProjects(prData.data);
       if (skData.success) setSkills(skData.data);
-      if (exData.success) setExperiences(exData.data);
+      if (exData.success) {
+        setExperiences(exData.data);
+        const ids = exData.data.map((item: Experience) => item.id);
+        latestExpIdsRef.current = ids;
+        lastSavedExpOrderRef.current = ids.join(",");
+      }
       if (msgData.success) setMessages(msgData.data);
     } catch {
       showNotification("error", "Gagal memuat data dari server.");
@@ -793,6 +960,41 @@ export default function AdminPage() {
         ),
       );
       showNotification("error", "Terjadi kesalahan jaringan.");
+    }
+  };
+
+  const handleReorderExperiences = (reordered: Experience[]) => {
+    const withOrder = reordered.map((item, idx) => ({
+      ...item,
+      sortOrder: idx + 1,
+    }));
+    latestExpIdsRef.current = withOrder.map((item) => item.id);
+    setExperiences(withOrder);
+  };
+
+  const handleSaveExperienceOrder = async () => {
+    const orderedIds = latestExpIdsRef.current;
+    const nextOrderKey = orderedIds.join(",");
+    if (orderedIds.length === 0 || nextOrderKey === lastSavedExpOrderRef.current) {
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/experiences", {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ orderedIds }),
+      });
+      if (res.ok) {
+        lastSavedExpOrderRef.current = nextOrderKey;
+        showNotification("success", "Urutan pengalaman berhasil disimpan ke database.");
+      } else {
+        showNotification("error", "Gagal menyimpan urutan pengalaman.");
+        fetchAdminData();
+      }
+    } catch {
+      showNotification("error", "Terjadi kesalahan koneksi saat menyimpan urutan.");
+      fetchAdminData();
     }
   };
 
@@ -1687,119 +1889,24 @@ export default function AdminPage() {
               </button>
             </GlassCard>
 
-            <div className="space-y-3">
-              {experiences.map((e) => (
-                <GlassCard
+            <Reorder.Group
+              axis="y"
+              values={experiences}
+              onReorder={handleReorderExperiences}
+              className="space-y-3"
+            >
+              {experiences.map((e, index) => (
+                <SortableExperienceItem
                   key={e.id}
-                  className={`p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4 transition-all ${
-                    e.published === false
-                      ? "opacity-75 border-dashed border-slate-300 dark:border-slate-700"
-                      : ""
-                  }`}
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <h4 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">
-                        {e.role}
-                      </h4>
-                      <span
-                        className={`px-2 py-0.5 text-[9px] font-bold rounded-md flex items-center gap-1 ${
-                          e.published !== false
-                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60"
-                            : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200/60 dark:border-white/10"
-                        }`}
-                      >
-                        {e.published !== false ? (
-                          <>
-                            <Eye className="w-2.5 h-2.5" />
-                            <span>Tampil</span>
-                          </>
-                        ) : (
-                          <>
-                            <EyeOff className="w-2.5 h-2.5" />
-                            <span>Sembunyi</span>
-                          </>
-                        )}
-                      </span>
-                    </div>
-                    <p className="text-xs font-semibold text-blue-600 dark:text-sky-400 mb-2">
-                      {e.company} ({e.period})
-                    </p>
-                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                      {e.description}
-                    </p>
-                    {e.highlights && e.highlights.length > 0 && (
-                      <ul className="mt-2.5 space-y-1">
-                        {e.highlights.map((h, idx) => (
-                          <li
-                            key={idx}
-                            className="text-[11px] text-slate-500 dark:text-slate-400 flex items-start gap-1.5"
-                          >
-                            <span className="text-blue-500 dark:text-sky-400 shrink-0 mt-0.5">
-                              &bull;
-                            </span>
-                            <span>{h}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-start pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/60 dark:border-white/10 w-full sm:w-auto justify-end">
-                    {/* Switch Tampil/Sembunyi */}
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={e.published !== false}
-                      onClick={() =>
-                        handleToggleExperienceVisibility(e.id, e.published)
-                      }
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full p-0.5 transition-colors duration-200 ease-in-out focus:outline-none ${
-                        e.published !== false
-                          ? "bg-emerald-500 dark:bg-emerald-400"
-                          : "bg-slate-300 dark:bg-slate-700"
-                      }`}
-                      title={
-                        e.published !== false
-                          ? "Status: Tampil di website portofolio (Klik untuk sembunyikan)"
-                          : "Status: Disembunyikan (Klik untuk tampilkan kembali)"
-                      }
-                    >
-                      <span
-                        className={`pointer-events-none flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-xs transition-transform duration-200 ease-in-out ${
-                          e.published !== false
-                            ? "translate-x-5"
-                            : "translate-x-0"
-                        }`}
-                      >
-                        {e.published !== false ? (
-                          <Eye className="w-3 h-3 text-emerald-600 block shrink-0" />
-                        ) : (
-                          <EyeOff className="w-3 h-3 text-slate-400 block shrink-0" />
-                        )}
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleOpenEditExpModal(e)}
-                      className="p-1.5 rounded-lg text-blue-600 dark:text-sky-400 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                      title="Edit Pengalaman"
-                    >
-                      <Edit className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteExp(e.id)}
-                      className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950 transition-colors cursor-pointer"
-                      title="Hapus Pengalaman"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </GlassCard>
+                  exp={e}
+                  index={index}
+                  onDragEnd={handleSaveExperienceOrder}
+                  onToggleVisibility={handleToggleExperienceVisibility}
+                  onEdit={handleOpenEditExpModal}
+                  onDelete={handleDeleteExp}
+                />
               ))}
-            </div>
+            </Reorder.Group>
           </div>
         )}
 
