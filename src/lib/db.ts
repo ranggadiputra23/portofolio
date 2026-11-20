@@ -1,6 +1,17 @@
 import { neon } from '@neondatabase/serverless';
 import crypto from 'crypto';
-import { Project, Skill, Experience, Profile, Message, AdminUser } from './types';
+import {
+  Project,
+  Skill,
+  Experience,
+  Profile,
+  Message,
+  AdminUser,
+  AnalyticsVisit,
+  AnalyticsSummary,
+  AnalyticsBreakdownItem,
+  AnalyticsDailyCount,
+} from './types';
 
 export function hashPassword(password: string): string {
   return crypto.createHash('sha256').update(password).digest('hex');
@@ -28,6 +39,7 @@ let memorySkills: Skill[] = [];
 let memoryExperiences: Experience[] = [];
 let memoryMessages: Message[] = [];
 let memoryAdmin: AdminUser | null = null;
+let memoryAnalytics: AnalyticsVisit[] = [];
 
 function getNeonSql() {
   const dbUrl = process.env.DATABASE_URL;
@@ -136,6 +148,26 @@ async function ensureTablesExist(sql: any) {
         created_at TEXT NOT NULL,
         updated_at TEXT
       );
+    `;
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS portfolio_analytics (
+        id TEXT PRIMARY KEY,
+        path TEXT NOT NULL,
+        visitor_hash TEXT NOT NULL,
+        device_type TEXT NOT NULL,
+        browser TEXT NOT NULL,
+        os TEXT NOT NULL,
+        country TEXT,
+        city TEXT,
+        referrer TEXT,
+        visited_at TEXT NOT NULL
+      );
+    `;
+
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_portfolio_analytics_visited_at
+      ON portfolio_analytics (visited_at DESC);
     `;
 
     tablesInitialized = true;
@@ -744,5 +776,147 @@ export async function updateAdminCredentials(newUsername: string, newPasswordPla
     updatedAt: now,
   };
   return memoryAdmin;
+}
+
+// Portfolio Visitor Analytics DAO Functions
+export async function recordAnalyticsVisit(
+  visit: Omit<AnalyticsVisit, 'id' | 'visitedAt'>
+): Promise<AnalyticsVisit> {
+  const newVisit: AnalyticsVisit = {
+    ...visit,
+    id: `vis-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    visitedAt: new Date().toISOString(),
+  };
+  memoryAnalytics.unshift(newVisit);
+  if (memoryAnalytics.length > 500) {
+    memoryAnalytics = memoryAnalytics.slice(0, 500);
+  }
+
+  const sql = getNeonSql();
+  if (sql) {
+    try {
+      await ensureTablesExist(sql);
+      await sql`
+        INSERT INTO portfolio_analytics (
+          id, path, visitor_hash, device_type, browser, os, country, city, referrer, visited_at
+        )
+        VALUES (
+          ${newVisit.id},
+          ${newVisit.path},
+          ${newVisit.visitorHash},
+          ${newVisit.deviceType},
+          ${newVisit.browser},
+          ${newVisit.os},
+          ${newVisit.country},
+          ${newVisit.city},
+          ${newVisit.referrer},
+          ${newVisit.visitedAt}
+        )
+      `;
+    } catch (e) {
+      console.error('Failed to record analytics visit on Neon DB:', e);
+    }
+  }
+
+  return newVisit;
+}
+
+function buildBreakdown(values: string[], limit = 5): AnalyticsBreakdownItem[] {
+  const counts = new Map<string, number>();
+  for (const raw of values) {
+    const label = raw && raw.trim() ? raw.trim() : 'Unknown';
+    counts.set(label, (counts.get(label) || 0) + 1);
+  }
+  return Array.from(counts.entries())
+    .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
+}
+
+export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
+  let rowsList: AnalyticsVisit[] = [...memoryAnalytics];
+
+  const sql = getNeonSql();
+  if (sql) {
+    try {
+      await ensureTablesExist(sql);
+      const rows = await sql`
+        SELECT * FROM portfolio_analytics
+        ORDER BY visited_at DESC
+        LIMIT 2000
+      `;
+      rowsList = rows.map((r: any) => ({
+        id: r.id,
+        path: r.path,
+        visitorHash: r.visitor_hash,
+        deviceType: r.device_type,
+        browser: r.browser,
+        os: r.os,
+        country: r.country || 'Local / Unknown',
+        city: r.city || '-',
+        referrer: r.referrer || 'Direct',
+        visitedAt: r.visited_at,
+      }));
+    } catch (e) {
+      console.warn('Neon DB analytics query failed, using memory fallback:', e);
+    }
+  }
+
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const uniqueSet = new Set<string>();
+  let todayVisits = 0;
+
+  const dailyMap = new Map<string, { visits: number; uniqueSet: Set<string> }>();
+  const last7Days: AnalyticsDailyCount[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setUTCDate(d.getUTCDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    dailyMap.set(key, { visits: 0, uniqueSet: new Set<string>() });
+    last7Days.push({
+      date: key,
+      label: d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
+      visits: 0,
+      unique: 0,
+    });
+  }
+
+  for (const v of rowsList) {
+    uniqueSet.add(v.visitorHash);
+    const dayKey = (v.visitedAt || '').slice(0, 10);
+    if (dayKey === todayKey) {
+      todayVisits += 1;
+    }
+    const bucket = dailyMap.get(dayKey);
+    if (bucket) {
+      bucket.visits += 1;
+      bucket.uniqueSet.add(v.visitorHash);
+    }
+  }
+
+  for (const item of last7Days) {
+    const bucket = dailyMap.get(item.date);
+    if (bucket) {
+      item.visits = bucket.visits;
+      item.unique = bucket.uniqueSet.size;
+    }
+  }
+
+  return {
+    totalVisits: rowsList.length,
+    uniqueVisitors: uniqueSet.size,
+    todayVisits,
+    last7Days,
+    devices: buildBreakdown(rowsList.map((v) => v.deviceType)),
+    browsers: buildBreakdown(rowsList.map((v) => v.browser)),
+    osList: buildBreakdown(rowsList.map((v) => v.os)),
+    countries: buildBreakdown(
+      rowsList.map((v) =>
+        v.city && v.city !== '-' ? `${v.city}, ${v.country}` : v.country
+      )
+    ),
+    referrers: buildBreakdown(rowsList.map((v) => v.referrer)),
+    recentVisits: rowsList.slice(0, 8),
+  };
 }
 

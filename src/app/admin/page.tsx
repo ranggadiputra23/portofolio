@@ -32,8 +32,19 @@ import {
   FileText,
   Loader2,
   GripVertical,
+  BarChart3,
+  Globe,
+  Monitor,
+  Users,
 } from "lucide-react";
-import { Project, Skill, Experience, Profile, Message } from "@/lib/types";
+import {
+  Project,
+  Skill,
+  Experience,
+  Profile,
+  Message,
+  AnalyticsSummary,
+} from "@/lib/types";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GlassCard } from "@/components/GlassCard";
 import { TechLogo } from "@/components/icons/TechIcons";
@@ -77,7 +88,7 @@ function SortableExperienceItem({
           <button
             type="button"
             onPointerDown={(event) => dragControls.start(event)}
-            className="min-w-[44px] min-h-[44px] -ml-2 -mt-1 flex flex-col items-center justify-center rounded-xl text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-200 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 touch-none cursor-grab active:cursor-grabbing shrink-0 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="min-w-11 min-h-11 -ml-2 -mt-1 flex flex-col items-center justify-center rounded-xl text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-200 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 touch-none cursor-grab active:cursor-grabbing shrink-0 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             aria-label={`Geser untuk mengubah urutan pengalaman ${exp.role}`}
             title="Tahan & geser untuk ubah urutan"
           >
@@ -165,9 +176,15 @@ function SortableExperienceItem({
               }`}
             >
               {exp.published !== false ? (
-                <Eye className="w-3 h-3 text-emerald-600 block shrink-0" aria-hidden="true" />
+                <Eye
+                  className="w-3 h-3 text-emerald-600 block shrink-0"
+                  aria-hidden="true"
+                />
               ) : (
-                <EyeOff className="w-3 h-3 text-slate-400 block shrink-0" aria-hidden="true" />
+                <EyeOff
+                  className="w-3 h-3 text-slate-400 block shrink-0"
+                  aria-hidden="true"
+                />
               )}
             </span>
           </button>
@@ -175,7 +192,7 @@ function SortableExperienceItem({
           <button
             type="button"
             onClick={() => onEdit(exp)}
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-blue-600 dark:text-sky-400 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="min-w-11 min-h-11 flex items-center justify-center rounded-lg text-blue-600 dark:text-sky-400 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             title="Edit Pengalaman"
             aria-label={`Edit pengalaman ${exp.role}`}
           >
@@ -184,7 +201,7 @@ function SortableExperienceItem({
           <button
             type="button"
             onClick={() => onDelete(exp.id)}
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+            className="min-w-11 min-h-11 flex items-center justify-center rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
             title="Hapus Pengalaman"
             aria-label={`Hapus pengalaman ${exp.role}`}
           >
@@ -220,6 +237,7 @@ export default function AdminPage() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState<{
     type: "success" | "error";
@@ -337,21 +355,24 @@ export default function AdminPage() {
     try {
       const headers = getAuthHeaders();
 
-      const [pRes, prRes, skRes, exRes, msgRes] = await Promise.all([
+      const [pRes, prRes, skRes, exRes, msgRes, anRes] = await Promise.all([
         fetch("/api/profile", { cache: "no-store" }),
         fetch("/api/projects", { cache: "no-store" }),
         fetch("/api/skills", { cache: "no-store" }),
         fetch("/api/experiences", { cache: "no-store" }),
         fetch("/api/messages", { headers, cache: "no-store" }),
+        fetch("/api/analytics", { headers, cache: "no-store" }),
       ]);
 
-      const [pData, prData, skData, exData, msgData] = await Promise.all([
-        pRes.json(),
-        prRes.json(),
-        skRes.json(),
-        exRes.json(),
-        msgRes.json(),
-      ]);
+      const [pData, prData, skData, exData, msgData, anData] =
+        await Promise.all([
+          pRes.json(),
+          prRes.json(),
+          skRes.json(),
+          exRes.json(),
+          msgRes.json(),
+          anRes.json(),
+        ]);
 
       if (pData.success) setProfile(pData.data);
       if (prData.success) setProjects(prData.data);
@@ -363,6 +384,7 @@ export default function AdminPage() {
         lastSavedExpOrderRef.current = ids.join(",");
       }
       if (msgData.success) setMessages(msgData.data);
+      if (anData.success) setAnalytics(anData.data);
     } catch {
       showNotification("error", "Gagal memuat data dari server.");
     } finally {
@@ -975,7 +997,10 @@ export default function AdminPage() {
   const handleSaveExperienceOrder = async () => {
     const orderedIds = latestExpIdsRef.current;
     const nextOrderKey = orderedIds.join(",");
-    if (orderedIds.length === 0 || nextOrderKey === lastSavedExpOrderRef.current) {
+    if (
+      orderedIds.length === 0 ||
+      nextOrderKey === lastSavedExpOrderRef.current
+    ) {
       return;
     }
 
@@ -987,13 +1012,19 @@ export default function AdminPage() {
       });
       if (res.ok) {
         lastSavedExpOrderRef.current = nextOrderKey;
-        showNotification("success", "Urutan pengalaman berhasil disimpan ke database.");
+        showNotification(
+          "success",
+          "Urutan pengalaman berhasil disimpan ke database.",
+        );
       } else {
         showNotification("error", "Gagal menyimpan urutan pengalaman.");
         fetchAdminData();
       }
     } catch {
-      showNotification("error", "Terjadi kesalahan koneksi saat menyimpan urutan.");
+      showNotification(
+        "error",
+        "Terjadi kesalahan koneksi saat menyimpan urutan.",
+      );
       fetchAdminData();
     }
   };
@@ -1506,6 +1537,244 @@ export default function AdminPage() {
                 </p>
               </GlassCard>
             </div>
+
+            {/* Visitor Analytics Summary in Overview */}
+            <GlassCard className="p-6 space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white flex items-center gap-2">
+                    <BarChart3
+                      className="w-4 h-4 text-blue-600 dark:text-sky-400"
+                      aria-hidden="true"
+                    />
+                    Analitik Pengunjung Website
+                  </h3>
+                  <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5">
+                    Data kunjungan publik tersimpan di Neon DB (tabel
+                    portfolio_analytics).
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  7 Hari Terakhir
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-4 rounded-xl bg-white/60 dark:bg-slate-800/50 border border-slate-200/60 dark:border-white/10">
+                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <Eye
+                      className="w-3.5 h-3.5 text-blue-600 dark:text-sky-400"
+                      aria-hidden="true"
+                    />
+                    Total Kunjungan
+                  </p>
+                  <p className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
+                    {analytics?.totalVisits ?? 0}
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl bg-white/60 dark:bg-slate-800/50 border border-slate-200/60 dark:border-white/10">
+                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <Users
+                      className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"
+                      aria-hidden="true"
+                    />
+                    Pengunjung Unik
+                  </p>
+                  <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
+                    {analytics?.uniqueVisitors ?? 0}
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl bg-white/60 dark:bg-slate-800/50 border border-slate-200/60 dark:border-white/10">
+                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <BarChart3
+                      className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400"
+                      aria-hidden="true"
+                    />
+                    Kunjungan Hari Ini
+                  </p>
+                  <p className="text-2xl font-extrabold text-blue-600 dark:text-sky-400 mt-1">
+                    {analytics?.todayVisits ?? 0}
+                  </p>
+                </div>
+              </div>
+
+              {/* 7-Day Bar Chart */}
+              {analytics && (
+                <div className="p-4 rounded-xl bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-white/10">
+                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-3">
+                    Tren Kunjungan Harian
+                  </p>
+                  <div className="grid grid-cols-7 gap-2 items-end h-28">
+                    {(() => {
+                      const maxVal = Math.max(
+                        1,
+                        ...analytics.last7Days.map((d) => d.visits),
+                      );
+                      return analytics.last7Days.map((day) => {
+                        const heightPct = Math.round(
+                          (day.visits / maxVal) * 100,
+                        );
+                        return (
+                          <div
+                            key={day.date}
+                            className="flex flex-col items-center justify-end h-full gap-1"
+                          >
+                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                              {day.visits}
+                            </span>
+                            <div className="w-full max-w-8 flex-1 flex items-end">
+                              <div
+                                className="w-full rounded-t-md bg-blue-600/85 dark:bg-sky-400/85 transition-all"
+                                style={{
+                                  height: `${day.visits > 0 ? Math.max(10, heightPct) : 4}%`,
+                                  opacity: day.visits > 0 ? 1 : 0.25,
+                                }}
+                                title={`${day.label}: ${day.visits} kunjungan (${day.unique} unik)`}
+                              />
+                            </div>
+                            <span className="text-[10px] text-slate-600 dark:text-slate-400 truncate max-w-full">
+                              {day.label}
+                            </span>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
+              )}
+
+              {/* Breakdown Grid: Device, Browser, OS, Location/Referrer */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="p-3.5 rounded-xl bg-white/50 dark:bg-slate-800/40 border border-slate-200/50 dark:border-white/10">
+                  <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5 mb-2">
+                    <Monitor
+                      className="w-3.5 h-3.5 text-blue-600 dark:text-sky-400"
+                      aria-hidden="true"
+                    />
+                    Perangkat
+                  </p>
+                  <div className="space-y-1.5">
+                    {analytics?.devices.length ? (
+                      analytics.devices.map((item) => (
+                        <div
+                          key={item.label}
+                          className="flex items-center justify-between text-xs"
+                        >
+                          <span className="text-slate-700 dark:text-slate-300 truncate">
+                            {item.label}
+                          </span>
+                          <span className="font-bold text-slate-900 dark:text-white">
+                            {item.count}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-slate-600 dark:text-slate-400">
+                        Belum ada data
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-white/50 dark:bg-slate-800/40 border border-slate-200/50 dark:border-white/10">
+                  <p className="text-xs font-bold text-slate-900 dark:text-white mb-2">
+                    Browser & OS
+                  </p>
+                  <div className="space-y-1.5">
+                    {analytics?.browsers.length ? (
+                      analytics.browsers.slice(0, 3).map((item) => (
+                        <div
+                          key={item.label}
+                          className="flex items-center justify-between text-xs"
+                        >
+                          <span className="text-slate-700 dark:text-slate-300 truncate">
+                            {item.label}
+                          </span>
+                          <span className="font-bold text-slate-900 dark:text-white">
+                            {item.count}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-slate-600 dark:text-slate-400">
+                        Belum ada data
+                      </p>
+                    )}
+                    {analytics?.osList.slice(0, 2).map((item) => (
+                      <div
+                        key={`os-${item.label}`}
+                        className="flex items-center justify-between text-xs opacity-80"
+                      >
+                        <span className="text-slate-700 dark:text-slate-300 truncate">
+                          OS: {item.label}
+                        </span>
+                        <span className="font-bold text-slate-900 dark:text-white">
+                          {item.count}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-white/50 dark:bg-slate-800/40 border border-slate-200/50 dark:border-white/10">
+                  <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5 mb-2">
+                    <Globe
+                      className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"
+                      aria-hidden="true"
+                    />
+                    Lokasi Pengunjung
+                  </p>
+                  <div className="space-y-1.5">
+                    {analytics?.countries.length ? (
+                      analytics.countries.map((item) => (
+                        <div
+                          key={item.label}
+                          className="flex items-center justify-between text-xs gap-2"
+                        >
+                          <span className="text-slate-700 dark:text-slate-300 truncate">
+                            {item.label}
+                          </span>
+                          <span className="font-bold text-slate-900 dark:text-white shrink-0">
+                            {item.count}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-slate-600 dark:text-slate-400">
+                        Belum ada data
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-white/50 dark:bg-slate-800/40 border border-slate-200/50 dark:border-white/10">
+                  <p className="text-xs font-bold text-slate-900 dark:text-white mb-2">
+                    Sumber Referrer
+                  </p>
+                  <div className="space-y-1.5">
+                    {analytics?.referrers.length ? (
+                      analytics.referrers.map((item) => (
+                        <div
+                          key={item.label}
+                          className="flex items-center justify-between text-xs gap-2"
+                        >
+                          <span className="text-slate-700 dark:text-slate-300 truncate">
+                            {item.label}
+                          </span>
+                          <span className="font-bold text-slate-900 dark:text-white shrink-0">
+                            {item.count}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-slate-600 dark:text-slate-400">
+                        Belum ada data
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </GlassCard>
 
             {/* Featured Projects Highlight Card */}
             <GlassCard className="p-6">

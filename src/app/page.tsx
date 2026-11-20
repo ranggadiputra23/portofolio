@@ -7,6 +7,7 @@ import Experience from '@/components/Experience';
 import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
 import PortfolioAnimator from '@/components/public/PortfolioAnimator';
+import AnalyticsTracker from '@/components/AnalyticsTracker';
 
 export const revalidate = 0; // Dynamic rendering for real-time DB updates
 
@@ -23,6 +24,7 @@ export default async function HomePage() {
 
   return (
     <PortfolioAnimator>
+      <AnalyticsTracker path="/" />
       <div className="min-h-screen relative selection:bg-blue-500 selection:text-white dark:selection:bg-sky-400 dark:selection:text-slate-950">
         <Navbar activeSection="hero" />
         <main>

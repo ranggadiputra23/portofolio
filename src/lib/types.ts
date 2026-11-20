@@ -71,3 +71,41 @@ export interface AdminUser {
   createdAt: string;
   updatedAt?: string;
 }
+
+export interface AnalyticsVisit {
+  id: string;
+  path: string;
+  visitorHash: string;
+  deviceType: string;
+  browser: string;
+  os: string;
+  country: string;
+  city: string;
+  referrer: string;
+  visitedAt: string;
+}
+
+export interface AnalyticsBreakdownItem {
+  label: string;
+  count: number;
+}
+
+export interface AnalyticsDailyCount {
+  date: string;
+  label: string;
+  visits: number;
+  unique: number;
+}
+
+export interface AnalyticsSummary {
+  totalVisits: number;
+  uniqueVisitors: number;
+  todayVisits: number;
+  last7Days: AnalyticsDailyCount[];
+  devices: AnalyticsBreakdownItem[];
+  browsers: AnalyticsBreakdownItem[];
+  osList: AnalyticsBreakdownItem[];
+  countries: AnalyticsBreakdownItem[];
+  referrers: AnalyticsBreakdownItem[];
+  recentVisits: AnalyticsVisit[];
+}
